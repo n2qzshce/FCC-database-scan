@@ -1,8 +1,10 @@
+from Logger import Logger
 from fcc_download import HamData
 from mysql_connector import MySqlConnector
 
 
 def main():
+	Logger()
 	mysql_connector = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
 	mysql_connector.execute_query("DROP SCHEMA fcc_amateur")
 	del mysql_connector

@@ -1,3 +1,5 @@
+import logging
+
 import mysql.connector
 
 
@@ -57,8 +59,12 @@ class MySqlConnector:
 		return
 
 	def execute_query(self, query):
-		self._cursor.execute(query)
-		self._connection.commit()
+		try:
+			self._cursor.execute(query)
+			self._connection.commit()
+		except Exception as ex:
+			logging.error(f"Error running query: ```{query}```")
+			raise ex
 		return
 
 	def __del__(self):

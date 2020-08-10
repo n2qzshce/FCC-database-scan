@@ -1,1 +1,0 @@
-use fcc_amateur;select en.callsign, am.class, full_name, address1, city, state, zip, former_call from en, am, hd where en.fccid=am.fccid and en.fccid=hd.fccid and hd.status=\"A\" and en.callsign=\"$CALLSIGN\"

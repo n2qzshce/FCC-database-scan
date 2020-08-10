@@ -63,7 +63,6 @@ class HamData:
 			line_string = en_file.readline().replace('\n', '')
 			line_string = line_string.replace("'", "\\'")
 			line = line_string.split('|')
-			print(line_string)
 
 			if len(line) <= 1:
 				break

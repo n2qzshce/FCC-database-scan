@@ -13,9 +13,6 @@ class MySqlConnector:
 		self._cursor = self._connection.cursor()
 		self._cursor.execute(f"CREATE DATABASE IF NOT EXISTS {database}")
 		self._cursor.execute(f"USE {database}")
-		# "Unzipping database file EN.dat..."
-		# "Unzipping database file AM.dat..."
-		# "Unzipping database file HD.dat..."
 
 		self.execute_query("""CREATE TABLE IF NOT EXISTS en_entities
 								(fcc_id int not null,
@@ -66,4 +63,3 @@ class MySqlConnector:
 
 	def __del__(self):
 		self._connection.disconnect()
-

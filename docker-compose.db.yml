@@ -3,12 +3,11 @@ version: '3.2'
 services:
   hamdb:
     image: mysql:8.0.21
-    command: --secure-file-priv="" --local-infile
     ports:
       - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=a
-      - MYSQL_DATABASE=hamdb
+      - MYSQL_DATABASE=fcc_amateur
     volumes:
       - mysql_hamdb:/var/lib/mysql
 volumes:

@@ -75,7 +75,7 @@ class HamData:
 			line_count += 1
 			if line_count % 50 == 0:
 				logging.info(f"Parsing line {line_count}")
-			line_string = line_string.replace("'", "\\'")
+			line_string = line_string.replace("\\", "\\\\").replace("'", "\\'")
 			line = line_string.split('|')
 
 			if len(line) <= 1:

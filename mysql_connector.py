@@ -58,14 +58,18 @@ class MySqlConnector:
 								index call_sign_idx(call_sign))""")
 		return
 
-	def execute_query(self, query):
+	def execute_query(self, query, commit=True):
 		try:
 			self._cursor.execute(query)
-			self._connection.commit()
+			if commit:
+				self._connection.commit()
 		except Exception as ex:
 			logging.error(f"Error running query: ```{query}```")
 			raise ex
 		return
+
+	def commit(self):
+		self._connection.commit()
 
 	def __del__(self):
 		self._connection.disconnect()

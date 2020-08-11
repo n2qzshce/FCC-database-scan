@@ -73,12 +73,13 @@ class HamData:
 		while True:
 			line_string = en_file.readline().replace('\n', '')
 			line_count += 1
-			if line_count % 50 == 0:
+			if line_count % 100 == 0:
 				logging.info(f"Parsing line {line_count}")
 			line_string = line_string.replace("\\", "\\\\").replace("'", "\\'")
 			line = line_string.split('|')
 
 			if len(line) <= 1:
+				self._db.commit()
 				break
 
 			try:
@@ -105,7 +106,11 @@ class HamData:
 													'{line[10]}', '{line[11]}', '{line[12]}', '{line[14]}', '{line[15]}', '{line[16]}', '{line[17]}',
 													'{line[18]}', '{line[19]}', '{line[20]}', '{line[22]}')
 												ON DUPLICATE KEY UPDATE `fcc_id`={line[1]}
-												""")
+												""", False)
+
+				if line_count % 500 == 0:
+					logging.info("Committing!")
+					self._db.commit()
 			except Exception as ex:
 				logging.error(f"Error on line: ```{line_string}```", ex)
 				raise ex
@@ -122,11 +127,12 @@ class HamData:
 		while True:
 			line_string = am_file.readline().replace('\n', '')
 			line_count += 1
-			if line_count % 50 == 0:
+			if line_count % 100 == 0:
 				logging.info(f"Parsing line {line_count}")
 			line = line_string.split('|')
 
 			if len(line) <= 1:
+				self._db.commit()
 				break
 
 			try:
@@ -136,7 +142,11 @@ class HamData:
 												operator_class)
 												VALUES('{line[1]}', '{line[4]}', '{line[5]}')
 												ON DUPLICATE KEY UPDATE `fcc_id`={line[1]}
-												""")
+												""", False)
+
+				if line_count % 500 == 0:
+					logging.info("Committing!")
+					self._db.commit()
 			except Exception as ex:
 				logging.error(f"Error on line: ```{line_string}```", ex)
 				raise ex
@@ -154,11 +164,12 @@ class HamData:
 		while True:
 			line_string = hd_file.readline().replace('\n', '')
 			line_count += 1
-			if line_count % 50 == 0:
+			if line_count % 100 == 0:
 				logging.info(f"Parsing line {line_count}")
 			line = line_string.split('|')
 
 			if len(line) <= 1:
+				self._db.commit()
 				break
 
 			try:
@@ -173,7 +184,11 @@ class HamData:
 										VALUES('{line[1]}', '{line[4]}', '{line[5]}', {self._mysql_date_str(line[7])}, 
 										{self._mysql_date_str(line[8])}, {self._mysql_date_str(line[9])}, '{line[11]}')
 										ON DUPLICATE KEY UPDATE `fcc_id`={line[1]}
-										""")
+										""", False)
+
+				if line_count % 500 == 0:
+					logging.info("Committing!")
+					self._db.commit()
 
 			except Exception as ex:
 				logging.error(f"Error on line: ```{line_string}```", ex)

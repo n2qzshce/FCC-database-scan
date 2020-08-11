@@ -111,18 +111,22 @@ class VanitySearch:
 		return result
 
 	def scan_existing_handles(self, possibles_list):
-		possibles_str = ",".join(possibles_list)
+		possibles_str = "','".join(possibles_list)
+		possibles_str = "'" + possibles_str + "'"
 		query = f"""select hd_license_header.call_sign,expired_date from hd_license_header
 					where hd_license_header.expired_date >= DATE_SUB(NOW(), INTERVAL 2 YEAR)
 					AND hd_license_header.call_sign in ({possibles_str});"""
-		self._mysql_connector.execute_query(query)
+		self._mysql_connector.execute_query(query, False)
 		row = self._mysql_connector.fetchone()
 
-		while row is not None:
+		existing = set()
+		while True:
 			row = self._mysql_connector.fetchone()
-			break
+			if row is None:
+				break
+			existing.add(row[0])
 
-		return set()
+		return existing
 
 	def generate_vanity_handles(self):
 		possibles = set()
@@ -142,7 +146,7 @@ class VanitySearch:
 		existing = self.scan_existing_handles(possibles)
 		possibles.difference_update(existing)
 		after_len = len(possibles)
-		print(f"Removed {before_len - after_len} existing.")
+		logging.info(f"Removed {before_len - after_len} existing.")
 
 		f = open("possibles.txt", "w+")
 		for x in sorted(possibles):

@@ -19,11 +19,15 @@ def download_fcc_data():
 	del fcc_download
 
 
+def run_vanity_search():
+	vanity_search = VanitySearch()
+	vanity_search.generate_vanity_handles()
+
+
 def main():
 	Logger()
 	# download_fcc_data()
-	vanity_search = VanitySearch()
-	vanity_search.generate_vanity_handles()
+	# run_vanity_search()
 
 
 main()

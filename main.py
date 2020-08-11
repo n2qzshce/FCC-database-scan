@@ -1,14 +1,9 @@
 from Logger import Logger
 from fcc_download import HamData
-from mysql_connector import MySqlConnector
+from vanity_search import VanitySearch
 
 
-def main():
-	Logger()
-	mysql_connector = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
-	mysql_connector.execute_query("DROP SCHEMA fcc_amateur")
-	del mysql_connector
-
+def download_fcc_data():
 	fcc_download = HamData()
 	fcc_download.cleanup_downloads()
 
@@ -16,14 +11,19 @@ def main():
 	fcc_download.import_data()
 	fcc_download.cleanup_downloads()
 
-	fcc_download.download_and_extract_day('sun')
-	fcc_download.import_data()
-	fcc_download.cleanup_downloads()
+	for day in {'sun', 'mon', 'tue'}:
+		fcc_download.download_and_extract_day(day)
+		fcc_download.import_data()
+		fcc_download.cleanup_downloads()
 
-	fcc_download.download_and_extract_day('mon')
-	fcc_download.import_data()
-	fcc_download.cleanup_downloads()
 	del fcc_download
+
+
+def main():
+	Logger()
+	# download_fcc_data()
+	vanity_search = VanitySearch()
+	vanity_search.generate_vanity_handles()
 
 
 main()

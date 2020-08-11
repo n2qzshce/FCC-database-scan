@@ -46,6 +46,7 @@ class HamData:
 		local_file = open(download_path, 'wb')
 		shutil.copyfileobj(data_file, local_file)
 
+		zip_ref = None
 		try:
 			zip_ref = zipfile.ZipFile(download_path, 'r')
 			zip_ref.extractall(self._FILE_DIR)

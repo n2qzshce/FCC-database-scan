@@ -68,6 +68,9 @@ class MySqlConnector:
 			raise ex
 		return
 
+	def fetchone(self):
+		return self._cursor.fetchone()
+
 	def commit(self):
 		self._connection.commit()
 

@@ -11,7 +11,7 @@ def download_fcc_data():
 	fcc_download.import_data()
 	fcc_download.cleanup_downloads()
 
-	for day in {'sun', 'mon', 'tue'}:
+	for day in {'sun'}:
 		fcc_download.download_and_extract_day(day)
 		fcc_download.import_data()
 		fcc_download.cleanup_downloads()
@@ -27,7 +27,7 @@ def run_vanity_search():
 def main():
 	Logger()
 	# download_fcc_data()
-	# run_vanity_search()
+	run_vanity_search()
 
 
 main()

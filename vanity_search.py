@@ -97,7 +97,11 @@ class VanitySearch:
 		# 12.  Call signs having the single letter prefix (K, N or W), a single digit numeral
 		#           0, 1, 2, 3, 4, 5, 6, 7, 8, 9 and a single letter suffix are reserved for the
 		#           special event call sign system.
-		banned = banned.intersection(self.generate_possibles({'K', 'N', 'W'}, self.chars_through('0', '9')))
+		short_handles = self.generate_possibles({'K', 'N', 'W'}, self.chars_through('0', '9'))
+		for x in short_handles:
+			if x in handles_set:
+				banned.add(x)
+		banned = banned.union()
 
 		return banned
 

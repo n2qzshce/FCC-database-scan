@@ -8,10 +8,9 @@ from mysql_connector import MySqlConnector
 
 
 class HamData:
-	# use fcc_amateur;select en.callsign, am.class, full_name, address1, city, state, zip, former_call from en, am,
-	# hd where en.fccid=am.fccid and en.fccid=hd.fccid and hd.status=\"A\" and en.callsign=\"$CALLSIGN\"
-	_FULL_URL = "ftp://wirelessftp.fcc.gov/pub/uls/complete/l_amat.zip"
-	_DAY_TEMPLATE_URL = "ftp://wirelessftp.fcc.gov/pub/uls/daily/l_ac_{day}.zip"
+	_FULL_LICENSE_URL = "ftp://wirelessftp.fcc.gov/pub/uls/complete/l_amat.zip"
+	_FULL_APPLICATION_URL = "ftp://wirelessftp.fcc.gov/pub/uls/complete/a_amat.zip"
+	_DAY_LICENSE_TEMPLATE_URL = "ftp://wirelessftp.fcc.gov/pub/uls/daily/l_ac_{day}.zip"
 	_FILE_DIR = 'download'
 	_db = None
 
@@ -22,13 +21,13 @@ class HamData:
 
 	def download_and_extract_day(self, day):
 		logging.info(f"Downloading day: {day}")
-		url_path = self._DAY_TEMPLATE_URL.format(day=day)
+		url_path = self._DAY_LICENSE_TEMPLATE_URL.format(day=day)
 		download_path = f'{self._FILE_DIR}/l_ac_{day}.zip'
 		self._download_and_extract(url_path, download_path)
 
 	def download_and_extract_week(self):
 		logging.info(f"Downloading full week")
-		url_path = self._FULL_URL
+		url_path = self._FULL_LICENSE_URL
 		download_path = f'{self._FILE_DIR}/l_amat.zip'
 		self._download_and_extract(url_path, download_path)
 
@@ -39,21 +38,24 @@ class HamData:
 			os.unlink(file_path)
 
 	def _download_and_extract(self, url_path, download_path):
-		logging.info(f"Downloading {url_path}")
-		data_file = request.urlopen(url_path)
-
-		logging.info(f"Extracting {download_path}")
-		local_file = open(download_path, 'wb')
-		shutil.copyfileobj(data_file, local_file)
 
 		zip_ref = None
-		try:
-			zip_ref = zipfile.ZipFile(download_path, 'r')
-			zip_ref.extractall(self._FILE_DIR)
-		except zipfile.BadZipFile:
-			logging.error(f"Error opening zip file: {download_path}")
-		finally:
-			del zip_ref
+		for x in range(1, 3):
+			logging.info(f"Attempt {x} downloading {url_path}")
+			data_file = request.urlopen(url_path)
+
+			logging.info(f"Extracting {download_path}")
+			local_file = open(download_path, 'wb')
+			shutil.copyfileobj(data_file, local_file)
+
+			try:
+				zip_ref = zipfile.ZipFile(download_path, 'r')
+				zip_ref.extractall(self._FILE_DIR)
+				break
+			except zipfile.BadZipFile:
+				logging.error(f"Error opening zip file: {download_path}")
+			finally:
+				del zip_ref
 
 		os.remove(download_path)
 

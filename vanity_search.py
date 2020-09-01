@@ -98,10 +98,16 @@ class VanitySearch:
 		#           0, 1, 2, 3, 4, 5, 6, 7, 8, 9 and a single letter suffix are reserved for the
 		#           special event call sign system.
 		short_handles = self.generate_possibles({'K', 'N', 'W'}, self.chars_through('0', '9'))
-		for x in short_handles:
-			if x in handles_set:
-				banned.add(x)
-		banned = banned.union()
+		short_banned = short_handles.intersection(handles_set)
+		banned = banned.union(short_banned)
+
+		# Two letter prefixes that are designed for regions 11-13 are not available in regions
+		# 1-10.
+		regionals = self.generate_possibles({'AL', 'KL', 'NL', 'WL', 'KP', 'NP', 'WP',
+														'AH', 'KH', 'NH', 'WH'}, self.chars_through('0', '9'),
+														self.chars_through('A', 'Z'))
+		regional_banned = regionals.intersection(handles_set)
+		banned = banned.union(regional_banned)
 
 		return banned
 
@@ -118,7 +124,7 @@ class VanitySearch:
 		possibles_str = "','".join(possibles_list)
 		possibles_str = "'" + possibles_str + "'"
 		query = f"""select hd_license_header.call_sign,expired_date from hd_license_header
-					where hd_license_header.expired_date >= DATE_SUB(NOW(), INTERVAL 2 YEAR)
+					where hd_license_header.expired_date >= DATE_SUB(NOW(), INTERVAL 24 MONTH)
 					AND hd_license_header.call_sign in ({possibles_str});"""
 		self._mysql_connector.execute_query(query, False)
 		row = self._mysql_connector.fetchone()
@@ -138,6 +144,11 @@ class VanitySearch:
 												self.chars_through('A', 'Z'))
 		handles_2x1 = self.generate_possibles({"A", "K", "N"}, self.chars_through('A', 'Z'), self.chars_through('0', '9'),
 												self.chars_through('A', 'Z'))
+		handles_2x2 = self.generate_possibles({"A", "K", "N", "W"}, self.chars_through('A', 'Z'),
+												self.chars_through('0', '9'), self.chars_through('A', 'Z'),
+												self.chars_through('A', 'Z'))
+		handles_1x3 = self.generate_possibles({"K", "N", "W"}, self.chars_through('0', '9'), self.chars_through('A', 'Z'),
+												self.chars_through('A', 'Z'), self.chars_through('A', 'Z'))
 		possibles = possibles.union(handles_1x2, handles_2x1)
 
 		banned_handles = self.get_banned_handles(possibles)

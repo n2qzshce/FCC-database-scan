@@ -199,10 +199,10 @@ class VanitySearch:
 		f = open("possibles.txt", "w+")
 		for x in sorted(license_data):
 			date_pref = license_data[x]['date']
-			date_preference = date_pref if date_pref is not None else 'n/a'
+			date_preference = f'\t{date_pref}' if date_pref is not None else ''
 			order_pref = license_data[x]['preference']
-			order_preference = order_pref if order_pref is not None else 'n/a'
-			f.write(f"{x}\t{date_preference}\t{order_preference}\n")
+			order_preference = f"\t{order_pref}" if order_pref is not None else ''
+			f.write(f"{x}{date_preference}{order_preference}\n")
 		f.close()
 
 		return

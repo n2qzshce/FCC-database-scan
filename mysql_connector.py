@@ -43,6 +43,7 @@ class MySqlConnector:
 								(fcc_id int not null,
 								call_sign varchar(10),
 								operator_class varchar(1),
+								primary key(fcc_id),
 								index fcc_id_idx(fcc_id),
 								index call_sign_idx(call_sign))""")
 
@@ -54,8 +55,27 @@ class MySqlConnector:
 								expired_date date,
 								cancellation_date date,
 								reserved varchar(1),
+								primary key(fcc_id),
 								index fcc_id_idx(fcc_id),
 								index call_sign_idx(call_sign))""")
+
+		self.execute_query("""CREATE TABLE IF NOT EXISTS ad_application_detail
+								(unique_identifier int not null,
+								uls_file_number int,
+								application_purpose varchar(2),
+								application_status varchar(1),
+								receipt_date date,
+								primary key(unique_identifier),
+								index unique_identifier_idx(unique_identifier))""")
+
+		self.execute_query("""CREATE TABLE IF NOT EXISTS vc_vanity_call_sign
+								(unique_identifier int not null,
+								uls_file_number int,
+								order_preference int,
+								requested_call_sign varchar(10),
+								primary key(unique_identifier,order_preference),
+								index unique_identifier_idx(unique_identifier),
+								index requested_call_sign_idx(requested_call_sign))""")
 		return
 
 	def execute_query(self, query, commit=True):

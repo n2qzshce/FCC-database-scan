@@ -7,12 +7,15 @@ from vanity_search import VanitySearch
 
 def download_fcc_data():
 	fcc_download = HamData()
-	fcc_download.cleanup_downloads()
+	# fcc_download.cleanup_downloads()
 
 	current_date = datetime.date.today().strftime("%a").lower()
 
-	fcc_download.download_and_extract_week()
+	# fcc_download.download_and_extract_week()
 	fcc_download.import_data()
+
+	if current_date is not None:
+		return
 
 	for day in ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']:
 		fcc_download.cleanup_downloads()

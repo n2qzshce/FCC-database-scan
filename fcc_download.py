@@ -78,10 +78,10 @@ class HamData:
 		os.remove(f"{download_path}/{filename}")
 
 	def import_data(self):
-		# self._parse_en_file()
-		# self._parse_am_file()
-		# self._parse_hd_file()
-		# self._parse_ad_file()
+		self._parse_en_file()
+		self._parse_am_file()
+		self._parse_hd_file()
+		self._parse_ad_file()
 		self._parse_vc_file()
 
 	def _parse_en_file(self):

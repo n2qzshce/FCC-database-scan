@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from mysql_connector import MySqlConnector
@@ -138,11 +139,41 @@ class VanitySearch:
 
 		return existing
 
+	def scan_license_applications(self, possibles_list):
+		possibles_str = "','".join(possibles_list)
+		possibles_str = "'" + possibles_str + "'"
+		query = f"""select ad_application_detail.unique_identifier, ad_application_detail.uls_file_number, 
+					ad_application_detail.receipt_date, vc_vanity_call_sign.requested_call_sign, vc_vanity_call_sign.
+					order_preference from ad_application_detail join vc_vanity_call_sign on ad_application_detail.
+					unique_identifier=vc_vanity_call_sign.unique_identifier where 
+					ad_application_detail.receipt_date >= DATE_SUB(NOW(), INTERVAL 25 DAY) and 
+					vc_vanity_call_sign.requested_call_sign in ({possibles_str});"""
+		self._mysql_connector.execute_query(query, False)
+		row = self._mysql_connector.fetchone()
+
+		lowest_rank = dict.fromkeys(possibles_list)
+		for x in lowest_rank:
+			lowest_rank[x] = dict({'preference': None, 'date': None})
+
+		while True:
+			if row is None:
+				break
+
+			order_pref = lowest_rank[row[3]]
+			if order_pref['date'] is None or row[2] < order_pref['date']:
+				order_pref['date'] = row[2]
+				order_pref['preference'] = row[4]
+				lowest_rank[row[3]] = order_pref
+
+			row = self._mysql_connector.fetchone()
+
+		return lowest_rank
+
 	def generate_vanity_handles(self):
 		possibles = set()
-		handles_1x2 = self.generate_possibles({"K", "N"}, self.chars_through('0', '9'), self.chars_through('A', 'Z'),
+		handles_1x2 = self.generate_possibles({"K", "N", "W"}, self.chars_through('0', '9'), self.chars_through('A', 'Z'),
 												self.chars_through('A', 'Z'))
-		handles_2x1 = self.generate_possibles({"A", "K", "N"}, self.chars_through('A', 'Z'), self.chars_through('0', '9'),
+		handles_2x1 = self.generate_possibles({"A", "K", "N", "W"}, self.chars_through('A', 'Z'), self.chars_through('0', '9'),
 												self.chars_through('A', 'Z'))
 		handles_2x2 = self.generate_possibles({"A", "K", "N", "W"}, self.chars_through('A', 'Z'),
 												self.chars_through('0', '9'), self.chars_through('A', 'Z'),
@@ -163,9 +194,15 @@ class VanitySearch:
 		after_len = len(possibles)
 		logging.info(f"Removed {before_len - after_len} existing.")
 
+		license_data = self.scan_license_applications(possibles)
+
 		f = open("possibles.txt", "w+")
-		for x in sorted(possibles):
-			f.write(f"{x}\n")
+		for x in sorted(license_data):
+			date_pref = license_data[x]['date']
+			date_preference = date_pref if date_pref is not None else 'n/a'
+			order_pref = license_data[x]['preference']
+			order_preference = order_pref if order_pref is not None else 'n/a'
+			f.write(f"{x}\t{date_preference}\t{order_preference}\n")
 		f.close()
 
 		return

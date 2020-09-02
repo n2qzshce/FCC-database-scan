@@ -61,7 +61,7 @@ class MySqlConnector:
 
 		self.execute_query("""CREATE TABLE IF NOT EXISTS ad_application_detail
 								(unique_identifier int not null,
-								uls_file_number int,
+								uls_file_number varchar(10),
 								application_purpose varchar(2),
 								application_status varchar(1),
 								receipt_date date,

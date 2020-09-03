@@ -160,9 +160,11 @@ class VanitySearch:
 				break
 
 			order_pref = lowest_rank[row[3]]
-			if order_pref['date'] is None or row[2] < order_pref['date']:
-				order_pref['date'] = row[2]
+			if order_pref['preference'] is None or row[4] <= order_pref['preference']:
 				order_pref['preference'] = row[4]
+				lowest_rank[row[3]] = order_pref
+			if order_pref['date'] is None or row[2] <= order_pref['date']:
+				order_pref['date'] = row[2]
 				lowest_rank[row[3]] = order_pref
 
 			row = self._mysql_connector.fetchone()
@@ -198,6 +200,8 @@ class VanitySearch:
 
 		f = open("possibles.txt", "w+")
 		for x in sorted(license_data):
+			if license_data[x]['preference'] is not None and license_data[x]['preference'] == 1:
+				continue
 			date_pref = license_data[x]['date']
 			date_preference = f'\t{date_pref}' if date_pref is not None else ''
 			order_pref = license_data[x]['preference']

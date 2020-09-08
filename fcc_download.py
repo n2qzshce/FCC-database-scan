@@ -1,3 +1,4 @@
+import concurrent.futures
 import logging
 import os
 import shutil
@@ -17,7 +18,7 @@ class HamData:
 
 	def __init__(self):
 		mysql_connector = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
-		self._db = mysql_connector
+		db = mysql_connector
 		return
 
 	def download_and_extract_day(self, day):
@@ -78,13 +79,16 @@ class HamData:
 		os.remove(f"{download_path}/{filename}")
 
 	def import_data(self):
-		self._parse_en_file()
-		self._parse_am_file()
-		self._parse_hd_file()
-		self._parse_ad_file()
-		self._parse_vc_file()
+
+		with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+			executor.submit(self._parse_en_file)
+			executor.submit(self._parse_am_file)
+			executor.submit(self._parse_hd_file)
+			executor.submit(self._parse_ad_file)
+			executor.submit(self._parse_vc_file)
 
 	def _parse_en_file(self):
+		db = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
 		logging.info("Parsing EN.dat")
 		try:
 			en_file = open(f"{self._FILE_DIR}/license/EN.dat")
@@ -102,11 +106,11 @@ class HamData:
 			line = line_string.split('|')
 
 			if len(line) <= 1:
-				self._db.commit()
+				db.commit()
 				break
 
 			try:
-				self._db.execute_query(f"""INSERT INTO en_entities (
+				db.execute_query(f"""INSERT INTO en_entities (
 												fcc_id,
 												call_sign,
 												entity_type,
@@ -133,13 +137,14 @@ class HamData:
 
 				if line_count % 500 == 0:
 					logging.info("Committing!")
-					self._db.commit()
+					db.commit()
 			except Exception as ex:
 				logging.error(f"Error on line: ```{line_string}```", ex)
 				raise ex
 		en_file.close()
 
 	def _parse_am_file(self):
+		db = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
 		try:
 			am_file = open(f"{self._FILE_DIR}/license/AM.dat")
 		except FileNotFoundError:
@@ -155,11 +160,11 @@ class HamData:
 			line = line_string.split('|')
 
 			if len(line) <= 1:
-				self._db.commit()
+				db.commit()
 				break
 
 			try:
-				self._db.execute_query(f"""INSERT INTO am_amateur (
+				db.execute_query(f"""INSERT INTO am_amateur (
 												fcc_id,
 												call_sign,
 												operator_class)
@@ -169,13 +174,14 @@ class HamData:
 
 				if line_count % 500 == 0:
 					logging.info("Committing!")
-					self._db.commit()
+					db.commit()
 			except Exception as ex:
 				logging.error(f"Error on line: ```{line_string}```", ex)
 				raise ex
 		am_file.close()
 
 	def _parse_hd_file(self):
+		db = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
 		logging.info("Parsing HD.dat")
 		try:
 			hd_file = open(f"{self._FILE_DIR}/license/HD.dat")
@@ -192,11 +198,11 @@ class HamData:
 			line = line_string.split('|')
 
 			if len(line) <= 1:
-				self._db.commit()
+				db.commit()
 				break
 
 			try:
-				self._db.execute_query(f"""INSERT INTO hd_license_header (
+				db.execute_query(f"""INSERT INTO hd_license_header (
 										fcc_id,
 										call_sign,
 										license_status,
@@ -211,7 +217,7 @@ class HamData:
 
 				if line_count % 500 == 0:
 					logging.info("Committing!")
-					self._db.commit()
+					db.commit()
 
 			except Exception as ex:
 				logging.error(f"Error on line: ```{line_string}```", ex)
@@ -219,6 +225,7 @@ class HamData:
 		hd_file.close()
 
 	def _parse_ad_file(self):
+		db = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
 		logging.info("Parsing AD.dat")
 		try:
 			ad_file = open(f"{self._FILE_DIR}/application/AD.dat")
@@ -236,7 +243,7 @@ class HamData:
 			line = line_string.split('|')
 
 			if len(line) <= 1:
-				self._db.commit()
+				db.commit()
 				break
 
 			if line[2] != '':
@@ -245,7 +252,7 @@ class HamData:
 				line[2] = 'NULL'
 
 			try:
-				self._db.execute_query(f"""INSERT INTO ad_application_detail (
+				db.execute_query(f"""INSERT INTO ad_application_detail (
 										unique_identifier,
 										uls_file_number,
 										application_purpose,
@@ -258,7 +265,7 @@ class HamData:
 
 				if line_count % 500 == 0:
 					logging.info("Committing!")
-					self._db.commit()
+					db.commit()
 
 			except Exception as ex:
 				logging.error(f"Error on line: ```{line_string}```", ex)
@@ -266,6 +273,7 @@ class HamData:
 		ad_file.close()
 
 	def _parse_vc_file(self):
+		db = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
 		logging.info("Parsing VC.dat")
 		try:
 			ad_file = open(f"{self._FILE_DIR}/application/VC.dat")
@@ -284,7 +292,7 @@ class HamData:
 			line = line_string.split('|')
 
 			if len(line) <= 1:
-				self._db.commit()
+				db.commit()
 				break
 
 			if line[5] != '':
@@ -293,7 +301,7 @@ class HamData:
 				line[5] = 'NULL'
 
 			try:
-				self._db.execute_query(f"""INSERT INTO vc_vanity_call_sign (
+				db.execute_query(f"""INSERT INTO vc_vanity_call_sign (
 										unique_identifier,
 										uls_file_number,
 										order_preference,
@@ -304,7 +312,7 @@ class HamData:
 
 				if line_count % 500 == 0:
 					logging.info("Committing!")
-					self._db.commit()
+					db.commit()
 
 			except Exception as ex:
 				logging.error(f"Error on line: ```{line_string}```", ex)

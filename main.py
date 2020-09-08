@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 
 from Logger import Logger
@@ -37,7 +38,7 @@ def run_vanity_search():
 
 def main():
 	Logger()
-	# download_fcc_data()
+	download_fcc_data()
 	run_vanity_search()
 
 

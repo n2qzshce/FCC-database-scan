@@ -81,11 +81,17 @@ class HamData:
 	def import_data(self):
 
 		with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-			executor.submit(self._parse_en_file)
-			executor.submit(self._parse_am_file)
-			executor.submit(self._parse_hd_file)
-			executor.submit(self._parse_ad_file)
-			executor.submit(self._parse_vc_file)
+			en = executor.submit(self._parse_en_file)
+			am = executor.submit(self._parse_am_file)
+			hd = executor.submit(self._parse_hd_file)
+			ad = executor.submit(self._parse_ad_file)
+			vc = executor.submit(self._parse_vc_file)
+
+		en.result()
+		am.result()
+		hd.result()
+		ad.result()
+		vc.result()
 
 	def _parse_en_file(self):
 		db = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')

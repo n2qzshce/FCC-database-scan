@@ -14,11 +14,10 @@ class HamData:
 	_DAY_LICENSE_TEMPLATE_URL = "ftp://wirelessftp.fcc.gov/pub/uls/daily/l_ac_{day}.zip"
 	_DAY_APPLICATION_TEMPLATE_URL = "ftp://wirelessftp.fcc.gov/pub/uls/daily/a_am_{day}.zip"
 	_FILE_DIR = 'download'
-	_db = None
+	_log_line_interval = 1000
 
-	def __init__(self):
-		mysql_connector = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
-		db = mysql_connector
+	def __init__(self, log_line_interval=1000):
+		_log_line_interval = log_line_interval
 		return
 
 	def download_and_extract_day(self, day):
@@ -112,7 +111,7 @@ class HamData:
 		while True:
 			line_string = en_file.readline().replace('\n', '')
 			line_count += 1
-			if line_count % 100 == 0:
+			if line_count % self._log_line_interval == 0:
 				logging.info(f"Parsing line {line_count}")
 			line_string = line_string.replace("\\", "\\\\").replace("'", "\\'")
 			line = line_string.split('|')
@@ -167,7 +166,7 @@ class HamData:
 		while True:
 			line_string = am_file.readline().replace('\n', '')
 			line_count += 1
-			if line_count % 100 == 0:
+			if line_count % self._log_line_interval == 0:
 				logging.info(f"Parsing line {line_count}")
 			line = line_string.split('|')
 
@@ -205,7 +204,7 @@ class HamData:
 		while True:
 			line_string = hd_file.readline().replace('\n', '')
 			line_count += 1
-			if line_count % 100 == 0:
+			if line_count % self._log_line_interval == 0:
 				logging.info(f"Parsing line {line_count}")
 			line = line_string.split('|')
 
@@ -249,7 +248,7 @@ class HamData:
 		while True:
 			line_string = ad_file.readline().replace('\n', '')
 			line_count += 1
-			if line_count % 100 == 0:
+			if line_count % self._log_line_interval == 0:
 				logging.info(f"Parsing line {line_count}")
 			line_string = line_string.replace('\\', '')
 			line = line_string.split('|')
@@ -297,7 +296,7 @@ class HamData:
 		while True:
 			line_string = ad_file.readline().replace('\n', '')
 			line_count += 1
-			if line_count % 100 == 0:
+			if line_count % self._log_line_interval == 0:
 				logging.info(f"Parsing line {line_count}")
 			line_string = line_string.replace('\\', '')
 			line_string = line_string.replace("'", "\\'")

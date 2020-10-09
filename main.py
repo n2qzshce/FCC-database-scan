@@ -7,7 +7,7 @@ from vanity_search import VanitySearch
 
 
 def download_fcc_data():
-	fcc_download = HamData()
+	fcc_download = HamData(log_line_interval=1000)
 	fcc_download.cleanup_downloads()
 
 	current_date = datetime.date.today().strftime("%a").lower()

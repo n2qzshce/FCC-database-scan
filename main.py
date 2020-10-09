@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import logging
 
 from Logger import Logger
 from fcc_download import HamData
@@ -7,7 +8,7 @@ from vanity_search import VanitySearch
 
 
 def download_fcc_data():
-	fcc_download = HamData(log_line_interval=1000)
+	fcc_download = HamData(log_line_interval=5000)
 	fcc_download.cleanup_downloads()
 
 	current_date = datetime.date.today().strftime("%a").lower()
@@ -34,7 +35,7 @@ def run_vanity_search():
 
 
 def main():
-	Logger()
+	Logger(level=logging.INFO)
 	download_fcc_data()
 	run_vanity_search()
 

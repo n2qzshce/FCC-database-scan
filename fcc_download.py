@@ -25,28 +25,39 @@ class HamData:
 		os.makedirs(f"{self._FILE_DIR}/license", exist_ok=True)
 		os.makedirs(f"{self._FILE_DIR}/application", exist_ok=True)
 
-		url_path = self._DAY_LICENSE_TEMPLATE_URL.format(day=day)
-		filename = f'l_ac_{day}.zip'
-		download_path = f'{self._FILE_DIR}/license'
-		self._download_and_extract(url_path, download_path, filename)
+		license_url_path = self._DAY_LICENSE_TEMPLATE_URL.format(day=day)
+		license_filename = f'l_ac_{day}.zip'
+		license_path = f'{self._FILE_DIR}/license'
+		self._download_and_extract(license_url_path, license_path, license_filename)
 
-		url_path = self._DAY_APPLICATION_TEMPLATE_URL.format(day=day)
-		filename = f'a_am_{day}.zip'
-		download_path = f'{self._FILE_DIR}/application'
-		self._download_and_extract(url_path, download_path, filename)
+		application_url_path = self._DAY_APPLICATION_TEMPLATE_URL.format(day=day)
+		application_filename = f'a_am_{day}.zip'
+		application_path = f'{self._FILE_DIR}/application'
+
+		with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+			license_future = executor.submit(self._download_and_extract, license_url_path, license_path, license_filename)
+			app = executor.submit(self._download_and_extract, application_url_path, application_path, application_filename)
+
+		license_future.result()
+		app.result()
 
 	def download_and_extract_week(self):
 		logging.info(f"Downloading full week")
 		os.makedirs(f"{self._FILE_DIR}/license", exist_ok=True)
 		os.makedirs(f"{self._FILE_DIR}/application", exist_ok=True)
 
-		url_path = self._FULL_LICENSE_URL
-		download_path = f'{self._FILE_DIR}/license'
-		self._download_and_extract(url_path, download_path, "l_amat.zip")
+		license_url_path = self._FULL_LICENSE_URL
+		license_path = f'{self._FILE_DIR}/license'
 
-		url_path = self._FULL_APPLICATION_URL
-		download_path = f'{self._FILE_DIR}/application'
-		self._download_and_extract(url_path, download_path, "a_amat.zip")
+		application_url_path = self._FULL_APPLICATION_URL
+		application_path = f'{self._FILE_DIR}/application'
+
+		with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+			license_future = executor.submit(self._download_and_extract, license_url_path, license_path, "l_amat.zip")
+			app = executor.submit(self._download_and_extract, application_url_path, application_path, "a_amat.zip")
+
+		license_future.result()
+		app.result()
 
 	def cleanup_downloads(self):
 		for filename in os.listdir(f'{self._FILE_DIR}'):
@@ -147,7 +158,7 @@ class HamData:
 												""", False)
 
 				if line_count % 500 == 0:
-					logging.info("Committing!")
+					logging.debug("Committing!")
 					db.commit()
 			except Exception as ex:
 				logging.error(f"Error on line: ```{line_string}```", ex)
@@ -184,7 +195,7 @@ class HamData:
 												""", False)
 
 				if line_count % 500 == 0:
-					logging.info("Committing!")
+					logging.debug("Committing!")
 					db.commit()
 			except Exception as ex:
 				logging.error(f"Error on line: ```{line_string}```", ex)
@@ -227,7 +238,7 @@ class HamData:
 										""", False)
 
 				if line_count % 500 == 0:
-					logging.info("Committing!")
+					logging.debug("Committing!")
 					db.commit()
 
 			except Exception as ex:
@@ -275,7 +286,7 @@ class HamData:
 										""", False)
 
 				if line_count % 500 == 0:
-					logging.info("Committing!")
+					logging.debug("Committing!")
 					db.commit()
 
 			except Exception as ex:
@@ -322,7 +333,7 @@ class HamData:
 										""", False)
 
 				if line_count % 500 == 0:
-					logging.info("Committing!")
+					logging.debug("Committing!")
 					db.commit()
 
 			except Exception as ex:

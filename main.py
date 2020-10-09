@@ -15,9 +15,6 @@ def download_fcc_data():
 	fcc_download.download_and_extract_week()
 	fcc_download.import_data()
 
-	if current_date is not None:
-		return
-
 	for day in ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']:
 		fcc_download.cleanup_downloads()
 		fcc_download.download_and_extract_day(day)

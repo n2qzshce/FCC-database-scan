@@ -27,12 +27,14 @@ class HamData:
 		os.makedirs(f"{self._FILE_DIR}/application", exist_ok=True)
 
 		url_path = self._DAY_LICENSE_TEMPLATE_URL.format(day=day)
-		download_path = f'{self._FILE_DIR}/license/l_ac_{day}.zip'
-		self._download_and_extract(url_path, download_path)
+		filename = f'l_ac_{day}.zip'
+		download_path = f'{self._FILE_DIR}/license'
+		self._download_and_extract(url_path, download_path, filename)
 
 		url_path = self._DAY_APPLICATION_TEMPLATE_URL.format(day=day)
-		download_path = f'{self._FILE_DIR}/application/a_am_{day}.zip'
-		self._download_and_extract(url_path, download_path)
+		filename = f'a_am_{day}.zip'
+		download_path = f'{self._FILE_DIR}/application'
+		self._download_and_extract(url_path, download_path, filename)
 
 	def download_and_extract_week(self):
 		logging.info(f"Downloading full week")
@@ -64,7 +66,11 @@ class HamData:
 			data_file = request.urlopen(url_path)
 
 			logging.info(f"Extracting {download_path}/{filename}")
-			local_file = open(f"{download_path}/{filename}", 'wb')
+			try:
+				local_file = open(f"{download_path}/{filename}", 'wb')
+			except FileNotFoundError:
+				logging.error(f"Failed to open {download_path}/{filename}")
+				continue
 			shutil.copyfileobj(data_file, local_file)
 
 			try:

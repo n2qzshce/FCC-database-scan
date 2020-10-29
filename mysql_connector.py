@@ -76,6 +76,14 @@ class MySqlConnector:
 								primary key(unique_identifier,order_preference),
 								index unique_identifier_idx(unique_identifier),
 								index requested_call_sign_idx(requested_call_sign))""")
+
+		self.execute_query("""CREATE TABLE IF NOT EXISTS last_run
+								(id int not null auto_increment,
+								run_date date not null,
+								run_type varchar(8) not null,
+								primary key(id),
+								index run_date_idx(run_date))""")
+
 		return
 
 	def execute_query(self, query, commit=True):

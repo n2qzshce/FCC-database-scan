@@ -1,4 +1,5 @@
 import concurrent.futures
+import datetime
 import logging
 import os
 import shutil
@@ -8,31 +9,40 @@ from urllib import request
 from mysql_connector import MySqlConnector
 
 
+class RunType:
+	WEEK = 'week'
+	DAY = 'day'
+
+
 class HamData:
 	_FULL_LICENSE_URL = "ftp://wirelessftp.fcc.gov/pub/uls/complete/l_amat.zip"
 	_FULL_APPLICATION_URL = "ftp://wirelessftp.fcc.gov/pub/uls/complete/a_amat.zip"
 	_DAY_LICENSE_TEMPLATE_URL = "ftp://wirelessftp.fcc.gov/pub/uls/daily/l_ac_{day}.zip"
 	_DAY_APPLICATION_TEMPLATE_URL = "ftp://wirelessftp.fcc.gov/pub/uls/daily/a_am_{day}.zip"
 	_FILE_DIR = 'download'
-	_log_line_interval = 1000
+	_log_line_interval = None
 
 	def __init__(self, log_line_interval=1000):
-		_log_line_interval = log_line_interval
+		self._log_line_interval = log_line_interval
 		return
 
-	def download_and_extract_day(self, day):
-		logging.info(f"Downloading day: {day}")
-		os.makedirs(f"{self._FILE_DIR}/license", exist_ok=True)
-		os.makedirs(f"{self._FILE_DIR}/application", exist_ok=True)
+	def download_and_import_day(self, day):
+		self.cleanup_downloads()
+		day_name = day.strftime("%a").lower()
+		logging.info(f"Downloading day: {day} {day_name}")
 
-		license_url_path = self._DAY_LICENSE_TEMPLATE_URL.format(day=day)
-		license_filename = f'l_ac_{day}.zip'
 		license_path = f'{self._FILE_DIR}/license'
+		application_path = f'{self._FILE_DIR}/application'
+
+		os.makedirs(license_path, exist_ok=True)
+		os.makedirs(application_path, exist_ok=True)
+
+		license_url_path = self._DAY_LICENSE_TEMPLATE_URL.format(day=day_name)
+		license_filename = f'l_ac_{day_name}.zip'
 		self._download_and_extract(license_url_path, license_path, license_filename)
 
-		application_url_path = self._DAY_APPLICATION_TEMPLATE_URL.format(day=day)
-		application_filename = f'a_am_{day}.zip'
-		application_path = f'{self._FILE_DIR}/application'
+		application_url_path = self._DAY_APPLICATION_TEMPLATE_URL.format(day=day_name)
+		application_filename = f'a_am_{day_name}.zip'
 
 		with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
 			license_future = executor.submit(self._download_and_extract, license_url_path, license_path, license_filename)
@@ -40,17 +50,21 @@ class HamData:
 
 		license_future.result()
 		app.result()
+		self.import_data()
+		self.set_last_run_time(day, RunType.DAY)
 
-	def download_and_extract_week(self):
+	def download_and_import_week(self):
+		self.cleanup_downloads()
 		logging.info(f"Downloading full week")
-		os.makedirs(f"{self._FILE_DIR}/license", exist_ok=True)
-		os.makedirs(f"{self._FILE_DIR}/application", exist_ok=True)
+
+		license_path = f'{self._FILE_DIR}/license'
+		application_path = f'{self._FILE_DIR}/application'
+
+		os.makedirs(license_path, exist_ok=True)
+		os.makedirs(application_path, exist_ok=True)
 
 		license_url_path = self._FULL_LICENSE_URL
-		license_path = f'{self._FILE_DIR}/license'
-
 		application_url_path = self._FULL_APPLICATION_URL
-		application_path = f'{self._FILE_DIR}/application'
 
 		with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
 			license_future = executor.submit(self._download_and_extract, license_url_path, license_path, "l_amat.zip")
@@ -58,6 +72,25 @@ class HamData:
 
 		license_future.result()
 		app.result()
+		self.import_data()
+
+		today = datetime.date.today()
+		sunday = today - datetime.timedelta(days=today.weekday()+1)
+		self.set_last_run_time(sunday, RunType.WEEK)
+
+	def set_last_run_time(self, date, run_type):
+		db = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
+		mysql_date = self._mysql_date_str(date.strftime('%m/%d/%Y'))
+		db.execute_query(f"""INSERT INTO last_run (run_date, run_type) VALUES ({mysql_date}, '{run_type}')""")
+
+	# noinspection PyMethodMayBeStatic
+	def get_last_run_time(self, run_type):
+		db = MySqlConnector('127.0.0.1', 'fcc_amateur', 'root', 'a')
+		db.execute_query(f"""SELECT id, run_date, run_type FROM last_run WHERE run_type='{run_type}' ORDER BY run_date desc LIMIT 1""", False)
+		row = db.fetchone()
+		if row is None:
+			return None
+		return row[1]
 
 	def cleanup_downloads(self):
 		for filename in os.listdir(f'{self._FILE_DIR}'):
@@ -67,6 +100,7 @@ class HamData:
 			logging.info(f"Deleting {file_path}")
 			os.unlink(file_path)
 
+	# noinspection PyMethodMayBeStatic
 	def _download_and_extract(self, url_path, download_path, filename):
 		# noinspection PyUnusedLocal
 		zip_ref = None

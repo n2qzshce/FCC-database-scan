@@ -177,12 +177,12 @@ class VanitySearch:
 												self.chars_through('A', 'Z'))
 		handles_2x1 = self.generate_possibles({"A", "K", "N", "W"}, self.chars_through('A', 'Z'), self.chars_through('0', '9'),
 												self.chars_through('A', 'Z'))
-		handles_2x2 = self.generate_possibles({"A", "K", "N", "W"}, self.chars_through('A', 'Z'),
+		handles_2x2 = self.generate_possibles({"A", "K"}, self.chars_through('A', 'Z'),
 												self.chars_through('0', '9'), self.chars_through('A', 'Z'),
 												self.chars_through('A', 'Z'))
 		handles_1x3 = self.generate_possibles({"K", "N", "W"}, self.chars_through('0', '9'), self.chars_through('A', 'Z'),
 												self.chars_through('A', 'Z'), self.chars_through('A', 'Z'))
-		possibles = possibles.union(handles_1x2, handles_2x1)
+		possibles = possibles.union(handles_1x2, handles_2x1, handles_2x2, handles_1x3)
 
 		banned_handles = self.get_banned_handles(possibles)
 		before_len = len(possibles)

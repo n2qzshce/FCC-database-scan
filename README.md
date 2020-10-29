@@ -1,5 +1,6 @@
 # FCC-database-scan
 This is a tool for scanning the FCC database to search for available vanity handles. This program is designed to respect all FCC rules regarding available handles, and automatically remove any that are existing or that are allocated to another user and have not lapsed their grace period. 
+Handles that are in the `possibles.txt` are available for application IMMEDIATELY.
 
 ## Usage
 To use this tool, you will first need to launch the docker-compose for the mysql database (configurable MySQL coming soon) and then run the main.py.

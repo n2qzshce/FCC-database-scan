@@ -9,8 +9,18 @@ To use this tool, you will first need to launch the docker-compose for the mysql
 By default, this program will output a list of all available 4-character and 5-character HAM handles. If you want to change which handles you scan for, you can update
 the "generate_vanity_handles" method with your own use of "generate_possibles."
 
-`generate_possibles` accepts multiple sets describing which characters in sequence. `chars_through` will return a set with all characters between and including the digits
+`vanity_search.py generate_possibles` accepts multiple sets describing which characters in sequence. `chars_through` will return a set with all characters between and including the digits
 specified (e.g. `chars_through('A','C')` returns `{'A','B','C'}`
+
+### Searching for your handle (Example)
+
+If you'd like to search for a 1x2 handle, you will need to modify `vanity_search.py generate_vanity_handles` like so:
+```def generate_vanity_handles(self):
+		possibles = set()
+		handles_1x2 = self.generate_possibles({"K", "N", "W"}, self.chars_through('0', '9'), self.chars_through('A', 'Z'),
+												self.chars_through('A', 'Z'))
+		possibles = possibles.union(handles_1x2)
+```
 
 ### Output
 The `possibles.txt` will output a list of all available handles. If there are outstanding applications for those handles, the LOWEST RANKING preference and the EARLIEST application date will be shown. THESE MAY NOT BE THE SAME APPLICATIONS. If someone submitted preference 25 on 5-21-2020 and someone else submitted preference 3 on 6-14-2020, the output will show `{SOME HANDLE}     2020-05-21     3`

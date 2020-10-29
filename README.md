@@ -21,6 +21,7 @@ If you'd like to search for a 1x2 handle, you will need to modify `vanity_search
 												self.chars_through('A', 'Z'))
 		possibles = possibles.union(handles_1x2)
 ```
+Illegal/taken/invalid handles will be automatically pruned. (THERE'S NOT MANY 1X2'S OR 2X1'S AVAILABLE)
 
 ### Output
 The `possibles.txt` will output a list of all available handles. If there are outstanding applications for those handles, the LOWEST RANKING preference and the EARLIEST application date will be shown. THESE MAY NOT BE THE SAME APPLICATIONS. If someone submitted preference 25 on 5-21-2020 and someone else submitted preference 3 on 6-14-2020, the output will show `{SOME HANDLE}     2020-05-21     3`

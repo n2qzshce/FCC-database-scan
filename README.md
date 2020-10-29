@@ -1,5 +1,5 @@
 # FCC-database-scan
-This is a tool for scanning the FCC database to search for existing handles
+This is a tool for scanning the FCC database to search for available vanity handles
 
 ## Usage
 To use this tool, you will first need to launch the docker-compose for the mysql database (configurable MySQL coming soon) and then run the main.py.

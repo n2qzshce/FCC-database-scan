@@ -2,3 +2,4 @@ download/*
 venv
 .idea
 possibles.txt
+__pycache__/*
